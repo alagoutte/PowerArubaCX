@@ -13,9 +13,9 @@ function Get-ArubaCXinterfaces {
       Get list of all Aruba CX Interfaces (port, lag, vlan... with name, IP Address, description)
 
       .EXAMPLE
-      Get-ArubaCXIntefarces
+      Get-ArubaCXInterfaces
 
-      Get list of all interface (lag/port/vlan)
+      Get list of all interfaces (lag/port/vlan)
 
     #>
     Param(

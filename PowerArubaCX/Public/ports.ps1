@@ -20,7 +20,7 @@ function Get-ArubaCXPorts {
       .EXAMPLE
       Get-ArubaCXPorts -port 1/1/1 -selector statistics
 
-      Get port 1/1/1 statitics information
+      Get port 1/1/1 statistics information
     #>
     Param(
         [Parameter(Mandatory = $false, position = 1)]

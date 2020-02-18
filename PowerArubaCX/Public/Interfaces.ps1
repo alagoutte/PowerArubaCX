@@ -3,7 +3,102 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+function Add-ArubaCXInterfaces {
 
+    <#
+      .SYNOPSIS
+      Add Aruba CX Interfaces
+
+      .DESCRIPTION
+      Add Aruba CX Interfaces (lag)
+
+      .EXAMPLE
+      Add-ArubaCXInterfaces -lag 1
+
+      Add Interface lag 1 (mode passive)
+
+      .EXAMPLE
+      Add-ArubaCXInterfaces -lag 1 -lacp active
+
+      Add Interface lag 1 with LACP mode Active
+      #>
+    Param(
+        [Parameter (Mandatory = $true, ParameterSetName = "lag")]
+        [ValidateRange(1, 256)]
+        [int]$lag,
+        [Parameter (Mandatory = $false, ParameterSetName = "lag")]
+        [ValidateSet('passive', 'active')]
+        [string]$lacp,
+        #[Parameter (Mandatory = $false, ParameterSetName = "lag")]
+        #[switch]$mclag,
+        [Parameter(Mandatory = $false)]
+        [ValidateSet('up', 'down')]
+        [string]$admin,
+        [Parameter(Mandatory = $false)]
+        [switch]$routing,
+        [Parameter(Mandatory = $false)]
+        [string]$description,
+        [Parameter (Mandatory = $False)]
+        [ValidateNotNullOrEmpty()]
+        [PSObject]$connection = $DefaultArubaCXConnection
+    )
+    Begin {
+
+    }
+    Process {
+        $uri = "system/interfaces"
+
+        #create user_config sub parameter
+        #$user_config = New-Object -TypeName PSObject
+
+        $name = "lag" + $lag
+
+        $_interface = New-Object -TypeName PSObject
+
+        $_interface | Add-Member -name "name" -membertype NoteProperty -Value $name
+
+        if ( $PsBoundParameters.ContainsKey('description') ) {
+            $_interface | Add-Member -name "lacp" -membertype NoteProperty -Value "active"
+        }
+
+        if ( $PsBoundParameters.ContainsKey('routing') ) {
+            if ($routing) {
+                $user_config | Add-member -name "routing" -membertype NoteProperty -Value $true
+            }
+            else {
+                $user_config | Add-member -name "routing" -membertype NoteProperty -Value $false
+            }
+        }
+
+        if ( $PsBoundParameters.ContainsKey('description') ) {
+            $_interface | Add-Member -name "description" -membertype NoteProperty -Value $description
+        }
+
+        if ( $PsBoundParameters.ContainsKey('admin') ) {
+            $_interface | Add-member -name "admin" -membertype NoteProperty -Value $admin
+        }
+
+        #Disable because don't work on 10.04.0001 (OVA) -> hpe-restd[22554]: debug|LOG_ERR|unexpected Port attribute in the payload user_config
+        #if ( $PsBoundParameters.ContainsKey('mclag') ) {
+        #    if ($mclag) {
+        #        $user_config | Add-member -name "mclag_enabled" -membertype NoteProperty -Value $true
+        #    }
+        #    else {
+        #        $user_config | Add-member -name "mclag_enabled" -membertype NoteProperty -Value $false
+        #    }
+        #}
+
+        #Add user_config and to $_interface object
+        #$_interface | Add-Member -name "user_config" -membertype NoteProperty -Value $user_config
+
+        $response = Invoke-ArubaCXRestMethod -uri $uri -method 'POST' -body $_interface -connection $connection
+        $response
+        Get-ArubaCXInterfaces $name -connection $connection
+    }
+    End {
+
+    }
+}
 function Add-ArubaCXInterfacesVlanTrunks {
 
     <#

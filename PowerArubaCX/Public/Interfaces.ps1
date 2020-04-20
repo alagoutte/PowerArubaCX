@@ -604,3 +604,63 @@ function Remove-ArubaCXInterfacesVlanTrunks {
     End {
     }
 }
+
+function Remove-ArubaCXInterfaces {
+
+    <#
+        .SYNOPSIS
+        Remove an Interface on Aruba CX Switch
+
+        .DESCRIPTION
+        Remove a Interface on Aruba CX Switch (Lag)
+
+        .EXAMPLE
+        $int = Get-ArubaCXInterfaces -interface lag1
+        PS C:\>$int | Remove-ArubaCXInterfaces
+
+        Remove interface lag1
+
+        .EXAMPLE
+        Remove-ArubaCXInterfaces -interface lag1 -confirm:$false
+
+        Remove interface lag1 with no confirmation
+    #>
+
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'high')]
+    Param(
+        [Parameter (Mandatory = $true, ParameterSetName = "name")]
+        [string]$name,
+        [Parameter (Mandatory = $true, ValueFromPipeline = $true, Position = 1, ParameterSetName = "int")]
+        [ValidateScript( { Confirm-ArubaCXInterfaces $_ })]
+        [psobject]$int,
+        [Parameter (Mandatory = $False)]
+        [ValidateNotNullOrEmpty()]
+        [PSObject]$connection = $DefaultArubaCXConnection
+    )
+
+    Begin {
+    }
+
+    Process {
+
+        #get int name from interface ps object
+        if ($int) {
+            $name = $int.name
+        }
+
+        if ( $name -notmatch "\Alag") {
+            Throw "you can only remove lag interface"
+        }
+
+        $uri = "system/interfaces/${name}"
+
+        if ($PSCmdlet.ShouldProcess("Interface", "Remove Interface ${name}")) {
+            Write-Progress -activity "Remove Interface"
+            Invoke-ArubaCXRestMethod -method "DELETE" -uri $uri -connection $connection
+            Write-Progress -activity "Remove Interface" -completed
+        }
+    }
+
+    End {
+    }
+}

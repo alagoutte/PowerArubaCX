@@ -40,7 +40,7 @@ Describe "Connect to a switch (using multi connection)" {
         $cx.session | Should -Not -BeNullOrEmpty
     }
 
-    It "Throw when try to use Invoke-ArubaCPRestMethod and not connected" {
+    It "Throw when try to use Invoke-ArubaCXRestMethod and not connected" {
         { Invoke-ArubaCXRestMethod -uri "rest/v1/system" } | Should throw "Not Connected. Connect to the Switch with Connect-ArubaCX"
     }
 
